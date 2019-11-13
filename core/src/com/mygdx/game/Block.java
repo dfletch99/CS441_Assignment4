@@ -5,21 +5,27 @@ import com.badlogic.gdx.math.Rectangle;
 public class Block {
     public static final String BLOCK_IMG_PATH = "block.png";
 
-    float dx;
+    float dy;
     Rectangle blockHitBox;
-    boolean visible;
+    boolean moving;
     int index;
 
-    public Block(int width, int height, int i){
+    public Block(float width, float height, int i){
         blockHitBox = new Rectangle();
         blockHitBox.width = width;
         blockHitBox.height = height;
-        visible = false;
+        moving = false;
         index = i;
-        dx = 5;
+        dy = 0;
     }
 
     public void stop(){
-        dx = 0;
+        dy = 0;
+    }
+    public void start(){
+        dy = 5;
+    }
+    public void accelerate(){
+        dy += 10;
     }
 }
