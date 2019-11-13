@@ -10,22 +10,16 @@ public class Block {
     boolean moving;
     int index;
 
-    public Block(float width, float height, int i){
+    public Block(float width, float height, int i, int speed){
         blockHitBox = new Rectangle();
         blockHitBox.width = width;
         blockHitBox.height = height;
         moving = false;
         index = i;
-        dy = 0;
+        dy = speed;
     }
 
     public void stop(){
         dy = 0;
-    }
-    public void start(){
-        dy = 5;
-    }
-    public void accelerate(){
-        dy += 10;
     }
 }
