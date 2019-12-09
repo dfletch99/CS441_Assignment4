@@ -1,6 +1,7 @@
 # CS441_Assignment4
 Block stacking... thing.
 Make a tower of blocks as high as you can
+
 Your score is kept on a leaderboard, there are 5 default scores/names to start, so the player can compete with something.
 
 # The Screens
