@@ -2,12 +2,20 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextField;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 
 public class MyGame extends ApplicationAdapter {
 	private SpriteBatch batch;
@@ -32,9 +40,14 @@ public class MyGame extends ApplicationAdapter {
 
 	private int animationTimer = 0;
 
+	private String[] names;
+	private int[] scores;
+	private int leaderBoardPage;
+
 	@Override
 	public void create () {
 		score = 0;
+		leaderBoardPage = 0;
 
 		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -74,6 +87,24 @@ public class MyGame extends ApplicationAdapter {
 		gameOverAnimation = false;
 		swap = "mm";
 
+		names = new String[100];
+		scores = new int[100];
+
+		addDefaultScores();
+	}
+
+	private void addDefaultScores() {
+		names[0] = "David";
+		names[1] = "Joe";
+		names[2] = "Kyle";
+		names[3] = "John";
+		names[4] = "Will";
+
+		scores[0] = 40;
+		scores[1] = 35;
+		scores[2] = 30;
+		scores[3] = 25;
+		scores[4] = 20;
 	}
 
 	@Override
@@ -156,7 +187,23 @@ public class MyGame extends ApplicationAdapter {
 			}
 		}
 		if(leaderBoard){
-			Gdx.app.exit();
+			batch.begin();
+			drawLeaderBoard(leaderBoardPage);
+			if(Gdx.input.justTouched()){
+				//Next page
+				if(Gdx.input.getX() >= 1750 && Gdx.input.getX() <= 2000 && Gdx.input.getY() >= 0 && Gdx.input.getY() <= 375 && leaderBoardPage < 4){
+					leaderBoardPage++;
+				}
+				//Previous Page
+				if(Gdx.input.getX() >= 1750 && Gdx.input.getX() <= 2000 && Gdx.input.getY() >= 715 && Gdx.input.getY() <= 1090 && leaderBoardPage > 0){
+					leaderBoardPage--;
+				}
+				//Back to Main Menu
+				if(Gdx.input.getX() >= 0 && Gdx.input.getX() <= 200 && Gdx.input.getY() >= 790 && Gdx.input.getY() <= 1090){
+					swap = "mm";
+				}
+			}
+			batch.end();
 		}
 		if(gameOverAnimation){
 			batch.begin();
@@ -216,6 +263,7 @@ public class MyGame extends ApplicationAdapter {
 				//check play button pressed
 				if (Gdx.input.getX() >= menuBlocks[0].blockHitBox.x && Gdx.input.getX() <= menuBlocks[0].blockHitBox.x + menuBlocks[0].blockHitBox.width) {
 					if (Gdx.input.getY() >= menuBlocks[0].blockHitBox.y && Gdx.input.getY() <= menuBlocks[0].blockHitBox.y + menuBlocks[0].blockHitBox.height) {
+						updateLeaderBoard(score, "Prof. Madden");
 						initializeGame();
 						swap = "mg";
 					}
@@ -223,6 +271,7 @@ public class MyGame extends ApplicationAdapter {
 				//check leaderboard button pressed
 				if(Gdx.input.getX() >= menuBlocks[1].blockHitBox.x && Gdx.input.getX() <= menuBlocks[1].blockHitBox.x + menuBlocks[1].blockHitBox.width){
 					if(Gdx.input.getY() >= menuBlocks[1].blockHitBox.y && Gdx.input.getY() <= menuBlocks[1].blockHitBox.y + menuBlocks[1].blockHitBox.height){
+						updateLeaderBoard(score, "Prof. Madden");
 						swap = "lb";
 					}
 				}
@@ -231,7 +280,83 @@ public class MyGame extends ApplicationAdapter {
 		swap(swap);
 	}
 
-    private void swap(String swap) {
+	private void drawLeaderBoard(int page) {
+		//Prev Page Button
+		batch.draw(block, 1750, 0, 250, 375);
+		//Next Page Button
+		batch.draw(block, 1750, 715, 250, 375);
+		//Back to Main Menu Button
+		batch.draw(block, 0, 0, 200, 320);
+		//rotate text to draw
+		fontMatrix.setToRotation(0,0,1, 90);
+		batch.setTransformMatrix(fontMatrix);
+		//draw text on buttons
+		font.setColor(1,1,1,1);
+		font.getData().setScale(4.5f);
+		font.draw(batch, "Previous", 75, -1850);
+		font.draw(batch, "Back", 90, -70);
+        font.getData().setScale(6f);
+		font.draw(batch, "Next", 815, -1845);
+
+		//draw page [page+1] of the leaderboard
+		font.setColor(0,0,0,1);
+		font.getData().setScale(8f);
+		font.draw(batch, "Leader Board", 150, -200);
+		font.getData().setScale(6f);
+		font.draw(batch, "Name:", 100, -350);
+		font.draw(batch, "Score:", 700, -350);
+		font.draw(batch, "Page " + (page + 1), 400, -1850);
+
+		int index = 0;
+		if(page != 7) {
+			for (int i = page * 15; i < (page * 15) + 15; i++) {
+				if (names[i] != null) {
+					font.draw(batch, names[i], 100, -380 - ((index + 1) * 80));
+					font.draw(batch, Integer.toString(scores[i]), 700, -380 - ((index + 1) * 80));
+				} else {
+					font.draw(batch, "N/A", 100, -380 - ((index + 1) * 80));
+					font.draw(batch, "N/A", 700, -380 - ((index + 1) * 80));
+				}
+				index++;
+			}
+		}
+		else{
+			for(int i = 90; i < 100; i++){
+				if (names[i] != null) {
+					font.draw(batch, names[i], 100, -380 - ((index + 1) * 80));
+					font.draw(batch, Integer.toString(scores[i]), 700, -380 - ((index + 1) * 80));
+				} else {
+					font.draw(batch, "N/A", 100, -380 - ((index + 1) * 80));
+					font.draw(batch, "N/A", 700, -380 - ((index + 1) * 80));
+				}
+				index++;
+			}
+		}
+
+		//rotate back to normal
+		fontMatrix.setToRotation(0,0,0, 0);
+		batch.setTransformMatrix(fontMatrix);
+	}
+
+	private void updateLeaderBoard(int score, String text) {
+		for(int i = 0; i < scores.length; i++){
+			if(scores[i] <= score){
+				shiftLeaderBoardDown(i);
+				scores[i] = score;
+				names[i] = text;
+				return;
+			}
+		}
+	}
+
+	private void shiftLeaderBoardDown(int index) {
+		for(int i = scores.length-1; i > index; i--){
+			scores[i] = scores[i-1];
+			names[i] = names[i-1];
+		}
+	}
+
+	private void swap(String swap) {
 		switch(swap){
 			case "mg":
 				mainGame = true;
@@ -309,6 +434,7 @@ public class MyGame extends ApplicationAdapter {
 	public void dispose () {
 		batch.dispose();
 		block.dispose();
+		font.dispose();
 	}
 
 	@Override

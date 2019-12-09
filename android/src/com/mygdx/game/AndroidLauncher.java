@@ -21,9 +21,4 @@ public class AndroidLauncher extends AndroidApplication {
 		//leaderBoardButton.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 		setContentView(gameView);
 	}
-
-	private void switchToLeaderBoard() {
-		Intent intent = new Intent(this, Leaderboard.class);
-		startActivity(intent);
-	}
 }
