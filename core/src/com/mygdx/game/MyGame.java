@@ -2,20 +2,12 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextField;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 
 public class MyGame extends ApplicationAdapter {
 	private SpriteBatch batch;
@@ -52,14 +44,14 @@ public class MyGame extends ApplicationAdapter {
 		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
+		w = Gdx.graphics.getWidth();
+		h = Gdx.graphics.getHeight();
+
 		numberOfBlocks = 0;
 		blocks = new Block[1000];
 		menuBlocks = new Block[3];
 		blockSpeed = 5;
-
-		blocks[0] = new Block(blockWidth, blockHeight, 0, blockSpeed);
-		blocks[0].blockHitBox.x = Gdx.graphics.getWidth() - blockWidth + 25;
-		blocks[0].blockHitBox.y = (float)(Math.random() * (Gdx.graphics.getHeight()-blockHeight));
+		initializeGame();
 
 		menuBlocks[0] = new Block(blockWidth + 150, blockHeight + 200, 0, 0);
 		menuBlocks[0].blockHitBox.x = (Gdx.graphics.getWidth() / 2) - 400;
@@ -114,6 +106,7 @@ public class MyGame extends ApplicationAdapter {
 		if(mainMenu){
 			resetCamera();
 			batch.begin();
+			System.out.println("block:" + blocks[0].blockHitBox.y + "\nh:" + h);
             fontMatrix.setToRotation(0,0,1, 90);
             batch.setTransformMatrix(fontMatrix);
             font.getData().setScale(8);
@@ -154,6 +147,7 @@ public class MyGame extends ApplicationAdapter {
 			    //check leaderboard button is pressed
 				if(Gdx.input.getX() >= menuBlocks[1].blockHitBox.x && Gdx.input.getX() <= menuBlocks[1].blockHitBox.x + menuBlocks[1].blockHitBox.width){
 					if(Gdx.input.getY() >= menuBlocks[1].blockHitBox.y && Gdx.input.getY() <= menuBlocks[1].blockHitBox.y + menuBlocks[1].blockHitBox.height){
+						leaderBoardPage = 0;
 						swap = "lb";
 					}
 				}
@@ -191,7 +185,7 @@ public class MyGame extends ApplicationAdapter {
 			drawLeaderBoard(leaderBoardPage);
 			if(Gdx.input.justTouched()){
 				//Next page
-				if(Gdx.input.getX() >= 1750 && Gdx.input.getX() <= 2000 && Gdx.input.getY() >= 0 && Gdx.input.getY() <= 375 && leaderBoardPage < 4){
+				if(Gdx.input.getX() >= 1750 && Gdx.input.getX() <= 2000 && Gdx.input.getY() >= 0 && Gdx.input.getY() <= 375 && leaderBoardPage < 6){
 					leaderBoardPage++;
 				}
 				//Previous Page
@@ -200,6 +194,7 @@ public class MyGame extends ApplicationAdapter {
 				}
 				//Back to Main Menu
 				if(Gdx.input.getX() >= 0 && Gdx.input.getX() <= 200 && Gdx.input.getY() >= 790 && Gdx.input.getY() <= 1090){
+				    initializeGame();
 					swap = "mm";
 				}
 			}
@@ -210,13 +205,13 @@ public class MyGame extends ApplicationAdapter {
 			for (int i = 0; i <= numberOfBlocks-1; i++) {
 				batch.draw(block, blocks[i].blockHitBox.x, blocks[i].blockHitBox.y, blocks[i].blockHitBox.width, blocks[i].blockHitBox.height);
 			}
-			if(camera.position.x <= 1014 && animationTimer != 200){
+			if(camera.position.x <= 1014 && animationTimer != 125 && score >= 9){
 				camera.translate(8,0,0);
 				camera.update();
 				//move score to always stay in the corner of the screen
 				textY -= 8;
 			}
-			else if(animationTimer != 175){
+			else if(animationTimer != 125){
 			    animationTimer++;
             }
 			else{
@@ -272,6 +267,7 @@ public class MyGame extends ApplicationAdapter {
 				if(Gdx.input.getX() >= menuBlocks[1].blockHitBox.x && Gdx.input.getX() <= menuBlocks[1].blockHitBox.x + menuBlocks[1].blockHitBox.width){
 					if(Gdx.input.getY() >= menuBlocks[1].blockHitBox.y && Gdx.input.getY() <= menuBlocks[1].blockHitBox.y + menuBlocks[1].blockHitBox.height){
 						updateLeaderBoard(score, "Prof. Madden");
+						leaderBoardPage = 0;
 						swap = "lb";
 					}
 				}
@@ -308,7 +304,7 @@ public class MyGame extends ApplicationAdapter {
 		font.draw(batch, "Page " + (page + 1), 400, -1850);
 
 		int index = 0;
-		if(page != 7) {
+		if(page != 6) {
 			for (int i = page * 15; i < (page * 15) + 15; i++) {
 				if (names[i] != null) {
 					font.draw(batch, names[i], 100, -380 - ((index + 1) * 80));
@@ -392,11 +388,13 @@ public class MyGame extends ApplicationAdapter {
 				leaderBoard = false;
 				gameOver = false;
 				gameOverAnimation = true;
+				break;
 			default:
 				mainGame = false;
 				mainMenu = false;
 				leaderBoard = false;
 				gameOver = false;
+				gameOverAnimation = false;
 				break;
 		}
 	}
@@ -404,7 +402,6 @@ public class MyGame extends ApplicationAdapter {
 	public void checkAlignment(Block topBlock, Block bottomBlock){
 		if(topBlock.blockHitBox.y > bottomBlock.blockHitBox.y + bottomBlock.blockHitBox.height ||
 			topBlock.blockHitBox.y + topBlock.blockHitBox.height < bottomBlock.blockHitBox.y) {
-			//updateLeaderBoard()
 			swap = "goa";
 			return;
 		}
